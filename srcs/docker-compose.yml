@@ -3,6 +3,8 @@ secrets:
     file: ../secrets/db_password.txt
   db_root_password:
     file: ../secrets/db_root_password.txt
+  credentials:
+    file: ../secrets/credentials.txt
 
 
 volumes:
@@ -22,6 +24,7 @@ volumes:
 
 networks:
   inception:
+    driver: bridge
 
 services:
   wordpress:
@@ -30,10 +33,15 @@ services:
     env_file: .env
     secrets:
       - db_password
+      - credentials
     networks:
       - inception 
     volumes:
       - wordpress_data:/var/www/wordpress
+    depends_on:
+      mariadb:
+          condition: service_healthy
+    restart: on-failure
   
   mariadb:
     image: mariadb
@@ -46,6 +54,12 @@ services:
       - inception
     volumes:
       - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin -u root -p$(cat /run/secrets/db_root_password) ping --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: on-failure
 
   nginx:
     image: nginx
@@ -56,3 +70,6 @@ services:
       - 443:443
     volumes:
       - wordpress_data:/var/www/wordpress
+    depends_on:
+      - wordpress
+    restart: on-failure

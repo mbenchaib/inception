@@ -15,8 +15,8 @@ else
     		sleep 1
 	done
 
-	USER_PASSWORD=$(cat /run/secrets/db_password.txt)
-	DB_ROOT_PASSWORD=$(cat /run/secrets/db_root_password.txt)
+	USER_PASSWORD=$(cat /run/secrets/db_password)
+	DB_ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
 
 	mariadb << EOF
 	CREATE DATABASE ${DB_NAME};
@@ -26,7 +26,7 @@ else
 EOF
 
 fi
-mariadb-admin shutdown
+mariadb-admin -u root -p"$DB_ROOT_PASSWORD" shutdown
 exec mariadbd --user=mysql
 
 
