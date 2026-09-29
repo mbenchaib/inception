@@ -24,9 +24,9 @@ else
 	GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'%';
 	ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASSWORD}';
 EOF
+	mariadb-admin -u root -p"$DB_ROOT_PASSWORD" shutdown
 
 fi
-mariadb-admin -u root -p"$DB_ROOT_PASSWORD" shutdown
 exec mariadbd --user=mysql
 
 
